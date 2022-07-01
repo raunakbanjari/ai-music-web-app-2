@@ -1,6 +1,15 @@
 happy = "";
 harry = "";
 
+rightWristX = 0;
+rightWristY = 0;
+leftWristX = 0;
+leftWristY = 0;
+scoreleftWrist = 0;
+scorerightwrist = 0;
+harry_song = "";
+happy_song = "";
+
 function preload(){
     happy = loadSound("happy.mp3");
     harry = loadSound("harry.mp3");
@@ -12,8 +21,55 @@ function setup(){
 
     video = createCapture(VIDEO);
     video.hide();
+
+    posenet = ml5.poseNet(video , modelLoaded);
+    posenet.on('pose', gotPoses);
 }
 
 function draw(){
     image(video,0,0,400,400);
+    fill('red');
+    stroke('red');
+    harry_song = harry.isPlaying();
+    happy_song = happy.isPlaying();
+    console.log(harry_song);
+    if(scoreleftWrist > 0.2){
+        circle(leftWristX -170 , leftWristY-60 , 20);
+        happy.stop();
+        if(harry_song == false){
+            harry.play();
+            console.log("playing harry potter theme song");
+            document.getElementById("song").innerHTML = "SONG NAME : HARRY POTTER THEME SONG";
+        }
+        
+    }
+    if(scorerightwrist > 0.2){
+        circle(rightWristX -100 , rightWristY-60 , 20);
+        harry.stop();
+        if(happy_song == false){
+            happy.play();
+            console.log("PLAYING HAPPY BIRTHDAY SONG");
+            document.getElementById("song").innerHTML = "SONG NAME : HAPPY BIRTHDAY SONG";
+        }
+    }
+
+
+}
+function modelLoaded(){
+    console.log("POSENET IS INITIALIZED");
+}
+
+function gotPoses(results){
+    if(results.length > 0){
+        console.log(results);
+        rightWristX = results[0].pose.rightWrist.x;
+        rightWristY = results[0].pose.rightWrist.y;
+        leftWristX = results[0].pose.leftWrist.x;
+        leftWristY = results[0].pose.leftWrist.y;
+        console.log("x coordinate of right wrist : " + rightWristX + " y coordinate of right wrist : " + rightWristY);
+        console.log("x coordinate of left wrist : " + leftWristX + " y coordinate of left wrist : " + leftWristX);
+        scoreleftWrist = results[0].pose.keypoints[9].score;
+        console.log(scoreleftWrist);
+        scorerightwrist = results[0].pose.keypoints[10].score;
+    }
 }
